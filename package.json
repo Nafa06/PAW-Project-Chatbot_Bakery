@@ -1,0 +1,24 @@
+{
+  "name": "praktikum",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nafa06/PAW-Project-Chatbot_Bakery.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nafa06/PAW-Project-Chatbot_Bakery/issues"
+  },
+  "homepage": "https://github.com/Nafa06/PAW-Project-Chatbot_Bakery#readme",
+  "dependencies": {
+    "ejs": "^7.0.2",
+    "express": "^5.3.0"
+  }
+}
