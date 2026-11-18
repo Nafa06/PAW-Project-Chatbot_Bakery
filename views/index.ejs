@@ -6,7 +6,7 @@
     
     <div class="flex gap-4 items-center">
        
-       <!-- 🚀 Panel Shortcut Baru -->
+       <!-- Panel Shortcut Baru -->
        <div class="flex gap-2 border-r border-gray-300 pr-4 mr-2">
          <button onclick="insertDummy()" class="bg-blue-50 text-blue-600 border border-blue-200 text-xs px-3 py-1.5 rounded font-bold hover:bg-blue-100 transition-colors">➕ Data Dummy</button>
          <button onclick="clearAllData()" class="bg-red-50 text-red-600 border border-red-200 text-xs px-3 py-1.5 rounded font-bold hover:bg-red-100 transition-colors">🗑️ Hapus Semua</button>
@@ -17,6 +17,9 @@
        </span>
     </div>
   </nav>
+
+  <!-- Notifikasi Toast -->
+  <div id="toast-notif" class="fixed bottom-5 right-5 z-50 hidden px-4 py-3 rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"></div>
 
   <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
     
@@ -30,30 +33,30 @@
         
         <form id="form-pesanan" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input 
-  type="text" 
-  id="input-pelanggan" 
-  placeholder="Nama Pelanggan *" 
-  required 
-  minlength="2"
-  oninput="this.value = this.value.replace(/[^a-zA-Z\s'.]/g, '')"
-  class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-selai"
->
+            type="text" 
+            id="input-pelanggan" 
+            placeholder="Nama Pelanggan *" 
+            required 
+            minlength="2"
+            oninput="this.value = this.value.replace(/[^a-zA-Z\s'.]/g, '')"
+            class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-selai"
+          >
           <input 
-  type="tel" 
-  id="input-kontak" 
-  placeholder="Kontak WA (Angka/WA, cth: 08123456789) *" 
-  required 
-  minlength="8"
-  pattern="[0-9+]+"
-  oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
-  class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-selai"
->
+            type="tel" 
+            id="input-kontak" 
+            placeholder="Kontak WA (Angka/WA, cth: 08123456789) *" 
+            required 
+            minlength="8"
+            pattern="[0-9+]+"
+            oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
+            class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-selai"
+          >
           <input 
-  type="date" 
-  id="input-deadline" 
-  required 
-  class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-selai"
->
+            type="date" 
+            id="input-deadline" 
+            required 
+            class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-selai"
+          >
           <input type="number" id="input-estimasi" placeholder="Harga Rp (Opsional/Auto)" min="0" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-selai">
           
           <textarea id="input-rincian" rows="2" placeholder="Rincian Custom Pesanan Kue *" required minlength="3" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-selai md:col-span-2"></textarea>
@@ -73,10 +76,10 @@
               <tr>
                 <th class="py-3 px-4 rounded-tl-lg">Deadline</th>
                 <th class="py-3 px-4">Pelanggan</th>
-                <th class="py-3 px-4">Rincian Custom (Editable)</th>
+                <th class="py-3 px-4">Rincian</th>
                 <th class="py-3 px-4">Harga</th>
                 <th class="py-3 px-4">Status</th>
-                <th class="py-3 px-4 rounded-tr-lg">Aksi (PUT/DELETE)</th>
+                <th class="py-3 px-4 rounded-tr-lg">Aksi</th>
               </tr>
             </thead>
             <tbody id="tabel-rekap" class="divide-y divide-gray-100">
@@ -111,200 +114,364 @@
 
     </div>
 
-    <!-- Kolom Kanan: Panel Chat WA (Lebar 1/3) -->
-    <div class="bg-white rounded-xl shadow-sm border border-krim flex flex-col h-[700px]">
+    <!-- Kolom Kanan: Panel Chat AI (Lebar 1/3) -->
+    <div class="bg-white rounded-xl shadow-sm border border-krim flex flex-col h-[550px] lg:h-[700px]">
       <div class="bg-[#075E54] text-white p-4 rounded-t-xl flex justify-between items-center">
         <div>
-          <h2 class="font-bold">Live Chat (WhatsApp)</h2>
-          <p class="text-xs text-green-100">Kak Nisa (+62 812-xxxx)</p>
+          <h2 class="font-bold flex items-center gap-2">🤖 BakeryBot Assistant</h2>
+          <p id="bot-status" class="text-xs text-green-100">Online • Tanya katalog, harga & estimasi</p>
         </div>
-        <span class="text-xs bg-red-500 px-2 py-1 rounded font-bold">Takeover</span>
+        <button onclick="resetChat()" title="Mulai ulang sesi chat" class="text-xs bg-emerald-700 hover:bg-emerald-800 px-2.5 py-1 rounded-full font-semibold transition-colors">
+          🔄 Reset
+        </button>
       </div>
       
-      <div class="flex-1 bg-[#E5DDD5] p-4 overflow-y-auto space-y-4 text-sm" style="background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');">
-        <div class="text-center text-xs text-gray-500 mb-4 bg-white/70 rounded-full w-fit mx-auto px-3 py-1">Hari Ini</div>
-        <div class="flex flex-col gap-1 items-start pr-12">
-          <span class="bg-white text-gray-800 p-3 rounded-lg rounded-tl-none shadow-sm relative">
-            Kak, kalau pesen kue tart 20cm tema bunga buat lusa bisa? Kira-kira totalnya berapa ya?
-          </span>
-        </div>
-        <div class="flex flex-col gap-1 items-end pl-12 pt-2">
-          <span class="bg-[#DCF8C6] text-gray-800 p-3 rounded-lg rounded-tr-none shadow-sm relative">
-            Halo Kak Nisa! 👋 Untuk Kue Tart (20cm) Rp 200.000. Kena biaya Rush Order (+ Rp 50.000) & desain bunga (+ Rp 20.000). Total <b>Rp 270.000</b> 🤖
-          </span>
+      <div id="chat-messages" class="flex-1 bg-[#E5DDD5] p-4 overflow-y-auto space-y-3 text-sm" style="background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');">
+        <div class="text-center text-xs text-gray-500 mb-2 bg-white/80 rounded-full w-fit mx-auto px-3 py-1">Hari Ini</div>
+        
+        <!-- Pesan Pembuka AI -->
+        <div class="flex flex-col gap-1 items-start pr-10">
+          <div class="bg-white text-gray-800 p-3 rounded-lg rounded-tl-none shadow-sm leading-relaxed">
+            Halo! Saya <b>BakeryBot</b> 👋 Silakan tanya seputar daftar menu kue, harga dasar, waktu pengerjaan, atau biaya tambahan di toko kami.
+          </div>
         </div>
       </div>
 
-      <div class="p-3 bg-gray-100 rounded-b-xl flex gap-2">
-        <input type="text" placeholder="Ketik pesan admin..." class="flex-1 border-none rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-        <button class="bg-[#128C7E] text-white p-2 w-10 h-10 flex justify-center items-center rounded-full font-bold">➤</button>
-      </div>
+      <form id="form-chat" class="p-3 bg-gray-100 rounded-b-xl flex gap-2 items-center">
+        <input 
+          type="text" 
+          id="chat-input" 
+          maxlength="500"
+          placeholder="Tanya harga kue atau pesan langsung..." 
+          autocomplete="off"
+          class="flex-1 bg-white border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#128C7E]"
+        >
+        <button 
+          type="submit" 
+          id="chat-submit"
+          class="bg-[#128C7E] hover:bg-[#075E54] disabled:bg-gray-400 text-white w-10 h-10 flex justify-center items-center rounded-full font-bold transition-colors shrink-0"
+        >
+          ➤
+        </button>
+      </form>
     </div>
 
   </main>
 
- <script>
-  function loadData() {
-    fetch('/api/produk')
-      .then(res => res.json())
-      .then(data => {
-        const bakery = data.data;
+  <script>
+    function showToast(message, isSuccess = true) {
+      const toast = document.getElementById('toast-notif');
+      toast.textContent = message;
+      toast.className = `fixed bottom-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 ${
+        isSuccess ? 'bg-emerald-600' : 'bg-red-600'
+      }`;
+      toast.classList.remove('hidden');
 
-        const rekapBody = document.getElementById('tabel-rekap');
-        rekapBody.innerHTML = '';
-        bakery.rekapPesanan.forEach(p => {
-          rekapBody.innerHTML += `
-            <tr class="hover:bg-gray-50 border-b border-gray-50">
-              <td class="py-3 px-4 font-bold text-selai">${p.deadline}</td>
-              <td class="py-3 px-4 font-semibold">${p.pelanggan} <br><span class="text-xs text-gray-400">${p.kontak}</span></td>
-              
-              <td class="py-3 px-4 min-w-[200px]">
-                <input type="text" id="edit-rincian-${p.id}" value="${p.rincian}" class="w-full border border-gray-200 rounded px-2 py-1 text-xs focus:border-selai">
-              </td>
-              
-              <td class="py-3 px-4 min-w-[130px]">
-                <input type="number" id="edit-estimasi-${p.id}" value="${p.estimasi}" min="0" class="w-28 border border-gray-200 rounded px-2 py-1 text-xs font-bold focus:border-selai">
-              </td>
-
-              <td class="py-3 px-4">
-                <select id="edit-status-${p.id}" class="text-xs border rounded p-1 font-semibold bg-gray-50">
-                  <option value="Menunggu DP" ${p.status === 'Menunggu DP' ? 'selected' : ''}>Menunggu DP</option>
-                  <option value="Proses Dapur" ${p.status === 'Proses Dapur' ? 'selected' : ''}>Proses Dapur</option>
-                  <option value="Selesai" ${p.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
-                  <option value="Batal" ${p.status === 'Batal' ? 'selected' : ''}>Batal</option>
-                </select>
-              </td>
-
-              <td class="py-3 px-4 flex gap-1 items-center">
-                <button onclick="simpanEdit(${p.id})" class="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 font-bold">Simpan</button>
-                <button onclick="deletePesanan(${p.id})" class="bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600 font-bold">Hapus</button>
-              </td>
-            </tr>`;
-        });
-
-        const katalogBody = document.getElementById('tabel-katalog');
-        katalogBody.innerHTML = '';
-        bakery.katalogDasar.forEach(p => {
-          katalogBody.innerHTML += `<tr class="border-b border-gray-100 last:border-0"><td class="py-2">${p.jenis}</td><td class="py-2 font-semibold">Rp ${Number(p.hargaDasar).toLocaleString('id-ID')}</td><td class="py-2 text-gray-500">${p.waktuNormal}</td></tr>`;
-        });
-
-        const biayaBody = document.getElementById('tabel-biaya');
-        biayaBody.innerHTML = '';
-        bakery.biayaTambahan.forEach(p => {
-          biayaBody.innerHTML += `<tr class="border-b border-gray-100 last:border-0"><td class="py-2 font-semibold">${p.parameter}<br><span class="text-xs text-gray-500 font-normal">${p.ket}</span></td><td class="py-2 text-selai font-medium">${p.range}</td></tr>`;
-        });
-      });
-  }
-
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('input-deadline').setAttribute('min', today);
-
-  document.getElementById('form-pesanan').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const btnSubmit = this.querySelector('button[type="submit"]');
-    btnSubmit.disabled = true;
-
-    const rawDate = document.getElementById('input-deadline').value; 
-    let deadlineFormatted = '';
-
-    if (rawDate) {
-      const [year, month, day] = rawDate.split('-');
-      deadlineFormatted = `${day}/${month}/${year}`;
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
     }
 
-    const body = {
-      pelanggan: document.getElementById('input-pelanggan').value,
-      kontak: document.getElementById('input-kontak').value,
-      rincian: document.getElementById('input-rincian').value,
-      deadline: deadlineFormatted,
-      estimasiManual: document.getElementById('input-estimasi').value
-    };
+    function loadData() {
+      fetch('/api/produk')
+        .then(res => res.json())
+        .then(data => {
+          const bakery = data.data;
 
-    fetch('/api/pesanan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    })
-    .then(res => res.json())
-    .then(resData => {
-      btnSubmit.disabled = false;
-      if (!resData.sukses) {
-        alert('Gagal menyimpan pesanan: ' + resData.pesan);
-        return;
+          const rekapBody = document.getElementById('tabel-rekap');
+          rekapBody.innerHTML = '';
+          bakery.rekapPesanan.forEach(p => {
+            const currentStatus = (p.status || '').trim();
+            const safeRincian = String(p.rincian || '').replace(/"/g, '&quot;');
+
+            rekapBody.innerHTML += `
+              <tr class="hover:bg-gray-50 border-b border-gray-50">
+                <td class="py-3 px-4 font-bold text-selai">${p.deadline}</td>
+                <td class="py-3 px-4 font-semibold">${p.pelanggan} <br><span class="text-xs text-gray-400">${p.kontak}</span></td>
+                
+                <td class="py-3 px-4 min-w-[200px]">
+                  <input type="text" id="edit-rincian-${p.id}" value="${safeRincian}" class="w-full border border-gray-200 rounded px-2 py-1 text-xs focus:border-selai">
+                </td>
+                
+                <td class="py-3 px-4 min-w-[130px]">
+                  <input type="number" id="edit-estimasi-${p.id}" value="${p.estimasi}" min="0" class="w-28 border border-gray-200 rounded px-2 py-1 text-xs font-bold focus:border-selai">
+                </td>
+
+                <td class="py-3 px-4">
+                  <select id="edit-status-${p.id}" class="text-xs border rounded p-1 font-semibold bg-gray-50">
+                    <option value="Menunggu DP" ${currentStatus === 'Menunggu DP' ? 'selected' : ''}>Menunggu DP</option>
+                    <option value="Proses Dapur" ${currentStatus === 'Proses Dapur' ? 'selected' : ''}>Proses Dapur</option>
+                    <option value="Selesai" ${currentStatus === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                    <option value="Batal" ${currentStatus === 'Batal' ? 'selected' : ''}>Batal</option>
+                  </select>
+                </td>
+
+                <td class="py-3 px-4 flex gap-1 items-center">
+                  <button onclick="simpanEdit(${p.id}, this)" class="bg-blue-600 text-white text-xs px-2.5 py-1 rounded hover:bg-blue-700 disabled:bg-gray-400 font-bold">Simpan</button>
+                  <button onclick="deletePesanan(${p.id})" class="bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600 font-bold">Hapus</button>
+                </td>
+              </tr>`;
+          });
+
+          const katalogBody = document.getElementById('tabel-katalog');
+          katalogBody.innerHTML = '';
+          bakery.katalogDasar.forEach(p => {
+            katalogBody.innerHTML += `<tr class="border-b border-gray-100 last:border-0"><td class="py-2">${p.jenis}</td><td class="py-2 font-semibold">Rp ${Number(p.hargaDasar).toLocaleString('id-ID')}</td><td class="py-2 text-gray-500">${p.waktuNormal}</td></tr>`;
+          });
+
+          const biayaBody = document.getElementById('tabel-biaya');
+          biayaBody.innerHTML = '';
+          bakery.biayaTambahan.forEach(p => {
+            biayaBody.innerHTML += `<tr class="border-b border-gray-100 last:border-0"><td class="py-2 font-semibold">${p.parameter}<br><span class="text-xs text-gray-500 font-normal">${p.ket}</span></td><td class="py-2 text-selai font-medium">${p.range}</td></tr>`;
+          });
+        });
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('input-deadline').setAttribute('min', today);
+
+    document.getElementById('form-pesanan').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const btnSubmit = this.querySelector('button[type="submit"]');
+      btnSubmit.disabled = true;
+
+      const rawDate = document.getElementById('input-deadline').value; 
+      let deadlineFormatted = '';
+
+      if (rawDate) {
+        const [year, month, day] = rawDate.split('-');
+        deadlineFormatted = `${day}/${month}/${year}`;
       }
-      this.reset();
-      loadData();
-    })
-    .catch(err => {
-      btnSubmit.disabled = false;
-      alert('Error koneksi server: ' + err.message);
-    });
-  });
 
-  function simpanEdit(id) {
-    const rincianBaru = document.getElementById(`edit-rincian-${id}`).value;
-    const estimasiBaru = document.getElementById(`edit-estimasi-${id}`).value;
-    const statusBaru = document.getElementById(`edit-status-${id}`).value;
+      const body = {
+        pelanggan: document.getElementById('input-pelanggan').value,
+        kontak: document.getElementById('input-kontak').value,
+        rincian: document.getElementById('input-rincian').value,
+        deadline: deadlineFormatted,
+        estimasiManual: document.getElementById('input-estimasi').value
+      };
 
-    fetch(`/api/pesanan/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        rincian: rincianBaru, 
-        estimasi: parseInt(estimasiBaru, 10) || 0, 
-        status: statusBaru 
+      fetch('/api/pesanan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
       })
-    })
-    .then(res => res.json())
-    .then(resData => {
-      if (!resData.sukses) alert('Gagal update data: ' + resData.pesan);
-      else loadData();
-    })
-    .catch(err => alert('Error koneksi: ' + err.message));
-  }
+      .then(res => res.json())
+      .then(resData => {
+        btnSubmit.disabled = false;
+        if (!resData.sukses) {
+          alert('Gagal menyimpan pesanan: ' + resData.pesan);
+          return;
+        }
+        this.reset();
+        loadData();
+      })
+      .catch(err => {
+        btnSubmit.disabled = false;
+        alert('Error koneksi server: ' + err.message);
+      });
+    });
 
-  function deletePesanan(id) {
-    if (confirm('Yakin mau menghapus pesanan ini dari database?')) {
-      fetch(`/api/pesanan/${id}`, { method: 'DELETE' })
-        .then(res => res.json())
-        .then(resData => {
-          if (!resData.sukses) alert('Gagal hapus data: ' + resData.pesan);
-          else loadData();
+    async function simpanEdit(id, btn) {
+      const rincianBaru = document.getElementById(`edit-rincian-${id}`).value.trim();
+      const estimasiBaru = document.getElementById(`edit-estimasi-${id}`).value;
+      const statusBaru = document.getElementById(`edit-status-${id}`).value;
+
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Menyimpan...';
+
+      try {
+        const res = await fetch(`/api/pesanan/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            rincian: rincianBaru, 
+            estimasi: parseInt(estimasiBaru, 10) || 0, 
+            status: statusBaru 
+          })
         });
-    }
-  }
 
-  function insertDummy() {
-    if (confirm('Masukkan 3 data pesanan dummy ke tabel?')) {
-      fetch('/api/pesanan/dummy', { method: 'POST' })
-        .then(res => res.json())
-        .then(resData => {
-          if (!resData.sukses) alert('Gagal: ' + resData.pesan);
-          else loadData();
+        const resData = await res.json();
+
+        if (!res.ok || !resData.sukses) {
+          showToast('❌ Gagal update: ' + (resData.pesan || 'Server error'), false);
+        } else {
+          showToast(`✅ Pesanan #${id} disimpan (Status: ${statusBaru})`, true);
+          loadData();
+        }
+      } catch (err) {
+        showToast('❌ Error koneksi: ' + err.message, false);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    function deletePesanan(id) {
+      if (confirm('Yakin mau menghapus pesanan ini dari database?')) {
+        fetch(`/api/pesanan/${id}`, { method: 'DELETE' })
+          .then(res => res.json())
+          .then(resData => {
+            if (!resData.sukses) alert('Gagal hapus data: ' + resData.pesan);
+            else loadData();
+          });
+      }
+    }
+
+    function insertDummy() {
+      if (confirm('Masukkan 3 data pesanan dummy ke tabel?')) {
+        fetch('/api/pesanan/dummy', { method: 'POST' })
+          .then(res => res.json())
+          .then(resData => {
+            if (!resData.sukses) alert('Gagal: ' + resData.pesan);
+            else loadData();
+          });
+      }
+    }
+
+    function clearAllData() {
+      const konfirmasi = prompt('Ketik "HAPUS" untuk menghapus seluruh data tabel!');
+      if (konfirmasi === 'HAPUS') {
+        fetch('/api/pesanan/clear', { method: 'DELETE' })
+          .then(res => res.json())
+          .then(resData => {
+            if (!resData.sukses) alert('Gagal: ' + resData.pesan);
+            else loadData();
+          });
+      } else if (konfirmasi !== null) {
+        alert('Penghapusan dibatalkan. Konfirmasi salah.');
+      }
+    }
+
+    loadData();
+
+    fetch('/api/status')
+      .then(res => res.json())
+      .then(() => document.getElementById('api-status-dot').classList.replace('bg-gray-400', 'bg-green-500'))
+      .catch(() => document.getElementById('api-status-dot').classList.replace('bg-gray-400', 'bg-red-500'));
+
+    // ==========================================
+    // LOGIKA CHATBOT & AUTO-REFRESH PESANAN AI
+    // ==========================================
+    const chatForm = document.getElementById('form-chat');
+    const chatInput = document.getElementById('chat-input');
+    const chatSubmit = document.getElementById('chat-submit');
+    const chatMessages = document.getElementById('chat-messages');
+    const botStatus = document.getElementById('bot-status');
+
+    function escapeHTML(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function appendChatBubble(text, sender) {
+      const wrapper = document.createElement('div');
+      const safeText = escapeHTML(text).replace(/\n/g, '<br>');
+
+      if (sender === 'user') {
+        wrapper.className = 'flex flex-col gap-1 items-end pl-10';
+        wrapper.innerHTML = `
+          <div class="bg-[#DCF8C6] text-gray-800 p-3 rounded-lg rounded-tr-none shadow-sm leading-relaxed break-words max-w-full">
+            ${safeText}
+          </div>`;
+      } else if (sender === 'error') {
+        wrapper.className = 'flex flex-col gap-1 items-start pr-10';
+        wrapper.innerHTML = `
+          <div class="bg-red-50 border border-red-300 text-red-700 p-3 rounded-lg rounded-tl-none shadow-sm text-xs leading-relaxed">
+            ⚠️ ${safeText}
+          </div>`;
+      } else {
+        wrapper.className = 'flex flex-col gap-1 items-start pr-10';
+        wrapper.innerHTML = `
+          <div class="bg-white text-gray-800 p-3 rounded-lg rounded-tl-none shadow-sm leading-relaxed break-words max-w-full">
+            ${safeText}
+          </div>`;
+      }
+
+      chatMessages.appendChild(wrapper);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showLoadingBubble() {
+      const loader = document.createElement('div');
+      loader.id = 'chat-loading-bubble';
+      loader.className = 'flex flex-col gap-1 items-start pr-10';
+      loader.innerHTML = `
+        <div class="bg-white/90 text-gray-500 italic px-3 py-2 rounded-lg rounded-tl-none shadow-sm text-xs flex items-center gap-2">
+          <span class="w-2 h-2 bg-[#128C7E] rounded-full animate-ping"></span>
+          BakeryBot sedang mengetik...
+        </div>`;
+      chatMessages.appendChild(loader);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeLoadingBubble() {
+      const loader = document.getElementById('chat-loading-bubble');
+      if (loader) loader.remove();
+    }
+
+    chatForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      appendChatBubble(message, 'user');
+      chatInput.value = '';
+      chatInput.disabled = true;
+      chatSubmit.disabled = true;
+      botStatus.textContent = 'Sedang mengetik...';
+      showLoadingBubble();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            sessionId: 'web-default'
+          })
         });
+
+        const result = await response.json();
+        removeLoadingBubble();
+
+        if (!response.ok || !result.success) {
+          appendChatBubble(result.message || 'Gagal mendapatkan respons dari AI.', 'error');
+        } else {
+          appendChatBubble(result.data.reply, 'bot');
+          if (result.data.orderCreated) {
+            loadData();
+          }
+        }
+      } catch (err) {
+        removeLoadingBubble();
+        appendChatBubble('Tidak dapat terhubung ke server. Periksa koneksi atau status backend.', 'error');
+      } finally {
+        chatInput.disabled = false;
+        chatSubmit.disabled = false;
+        botStatus.textContent = 'Online • Tanya katalog, harga & estimasi';
+        chatInput.focus();
+      }
+    });
+
+    function resetChat() {
+      fetch('/api/chat/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'web-default' })
+      }).then(() => {
+        chatMessages.innerHTML = `
+          <div class="text-center text-xs text-gray-500 mb-2 bg-white/80 rounded-full w-fit mx-auto px-3 py-1">Hari Ini</div>
+          <div class="flex flex-col gap-1 items-start pr-10">
+            <div class="bg-white text-gray-800 p-3 rounded-lg rounded-tl-none shadow-sm leading-relaxed">
+              Sesi direset! Halo, saya <b>BakeryBot</b> 👋 Silakan tanya katalog menu atau langsung sebutkan kue yang ingin dipesan.
+            </div>
+          </div>`;
+      });
     }
-  }
-
-  function clearAllData() {
-    const konfirmasi = prompt('Ketik "HAPUS" untuk menghapus seluruh data tabel!');
-    if (konfirmasi === 'HAPUS') {
-      fetch('/api/pesanan/clear', { method: 'DELETE' })
-        .then(res => res.json())
-        .then(resData => {
-          if (!resData.sukses) alert('Gagal: ' + resData.pesan);
-          else loadData();
-        });
-    } else if (konfirmasi !== null) {
-      alert('Penghapusan dibatalkan. Konfirmasi salah.');
-    }
-  }
-
-  loadData();
-
-  fetch('/api/status')
-    .then(res => res.json())
-    .then(() => document.getElementById('api-status-dot').classList.replace('bg-gray-400', 'bg-green-500'))
-    .catch(() => document.getElementById('api-status-dot').classList.replace('bg-gray-400', 'bg-red-500'));
-</script>
+  </script>
 <%- include('partials/footer') %>
