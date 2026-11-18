@@ -7,4 +7,7 @@ const router = express.Router();
 router.use('/api', apiRoutes);
 router.use('/', webRoutes);
 
+const chatRoutes = require('./chatRoutes');
+router.use('/api/chat', chatRoutes);
+
 module.exports = router;
