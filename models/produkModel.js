@@ -23,6 +23,43 @@ const ProdukModel = {
     return res.rows[0];
   },
 
+  async findPesanan({ id, kontak, pelanggan }) {
+    if (id) {
+      const numericId = parseInt(String(id).replace(/[^0-9]/g, ''), 10);
+      if (!Number.isNaN(numericId)) {
+        const res = await db.query(
+          'SELECT * FROM rekap_pesanan WHERE id = $1 ORDER BY id DESC',
+          [numericId]
+        );
+        if (res.rows.length > 0) return res.rows;
+      }
+    }
+
+    if (kontak) {
+      const digitsOnly = String(kontak).replace(/[^0-9]/g, '');
+      const coreNumber = digitsOnly.replace(/^(62|0)/, '');
+      if (coreNumber.length >= 6) {
+        const res = await db.query(
+          `SELECT * FROM rekap_pesanan 
+           WHERE REGEXP_REPLACE(kontak, '[^0-9]', '', 'g') LIKE $1 
+           ORDER BY id DESC LIMIT 5`,
+          [`%${coreNumber}`]
+        );
+        if (res.rows.length > 0) return res.rows;
+      }
+    }
+
+    if (pelanggan && String(pelanggan).trim().length >= 2) {
+      const res = await db.query(
+        'SELECT * FROM rekap_pesanan WHERE LOWER(pelanggan) LIKE LOWER($1) ORDER BY id DESC LIMIT 5',
+        [`%${String(pelanggan).trim()}%`]
+      );
+      return res.rows;
+    }
+
+    return [];
+  },
+
   async updatePesanan(id, data) {
     const { rincian, estimasi, status } = data;
     const query = `
