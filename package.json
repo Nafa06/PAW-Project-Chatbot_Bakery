@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/Nafa06/PAW-Project-Chatbot_Bakery#readme",
   "dependencies": {
+    "@google/genai": "^3.6.0",
+    "dotenv": "^18.0.10",
     "ejs": "^7.0.2",
     "express": "^5.3.0",
     "pg": "^8.23.1"
