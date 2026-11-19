@@ -1,10 +1,11 @@
 const express = require('express');
+const router = express.Router();
 const validateChatInput = require('../middlewares/validateChatInput');
 const chatController = require('../controllers/chatController');
 
-const router = express.Router();
-
-router.post('/', validateChatInput, chatController.sendMessage);
-router.post('/reset', chatController.resetSession);
+router.post('/', validateChatInput, chatController.handleChat);
+router.post('/reset', chatController.resetChat);
+router.get('/store-state', chatController.getStoreState);
+router.post('/store-state', chatController.updateStoreState);
 
 module.exports = router;
