@@ -50,13 +50,24 @@ const getState = () => {
 };
 
 // Dipanggil Admin dari Dashboard Web
-const setAdminToggle = ({ isFullOrder, adminManualOffline, maxPesananPerMinggu, estimasiBukaOrder }) => {
+const setAdminToggle = ({
+  isFullOrder,
+  forceManual,
+  adminManualOffline,
+  maxPesananPerMinggu,
+  estimasiBukaOrder
+}) => {
+  const wasFull = state.manualFullOrder || state.autoFullOrder;
+
   if (typeof isFullOrder === 'boolean') {
     if (isFullOrder) {
-      state.manualFullOrder = true; // Admin menyalakan -> bot tidak bisa mematikan
+      // Kunci manual hanya jika sebelumnya memang OPEN, atau admin memaksa lock manual
+      if (!wasFull || forceManual === true) {
+        state.manualFullOrder = true;
+      }
     } else {
       state.manualFullOrder = false;
-      state.autoFullOrder = false;  // Admin mematikan -> buka order kembali
+      state.autoFullOrder = false;
       state.estimasiBukaOrder = '';
     }
   }

@@ -63,12 +63,22 @@ const getStoreState = async (req, res) => {
   }
 };
 
-const updateStoreState = (req, res) => {
-  const updated = storeState.setAdminToggle(req.body || {});
-  return res.status(200).json({
-    success: true,
-    data: updated
-  });
+const updateStoreState = async (req, res) => {
+  try {
+    storeState.setAdminToggle(req.body || {});
+    await geminiService.cekKapasitasDanBentrok(null);
+
+    return res.status(200).json({
+      success: true,
+      data: storeState.getState()
+    });
+  } catch (error) {
+    console.error('[UpdateStoreState Error]:', error.message);
+    return res.status(200).json({
+      success: true,
+      data: storeState.getState()
+    });
+  }
 };
 
 module.exports = {
