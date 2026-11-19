@@ -4,6 +4,7 @@ const path = require('path');
 const config = require('./config');
 const logger = require('./middlewares/logger');
 const routes = require('./routes');
+const { initWhatsApp } = require('./services/whatsappService');
 
 const app = express();
 
@@ -28,4 +29,5 @@ app.use((req, res) => {
 
 app.listen(config.port, () => {
   console.log(`Server jalan di http://localhost:${config.port}`);
+  initWhatsApp();
 });
