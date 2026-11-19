@@ -1,37 +1,79 @@
 const geminiService = require('../services/geminiService');
+const storeState = require('../config/storeState');
 
-const chatController = {
-  async sendMessage(req, res) {
-    try {
-      const sessionId = req.body.sessionId || 'web-default';
-      const result = await geminiService.generateChatReply(req.cleanMessage, { sessionId });
+const handleChat = async (req, res) => {
+  try {
+    const message = req.cleanMessage;
+    const sessionId = req.body.sessionId || 'web-default';
 
+    if (storeState.isBotPausedForSession(sessionId)) {
       return res.status(200).json({
         success: true,
         data: {
-          reply: result.reply,
-          orderCreated: result.orderCreated
+          pausedByTakeover: true,
+          reply: 'Percakapan sedang ditangani langsung oleh Admin.',
+          orderCreated: false
         }
       });
-    } catch (error) {
-      console.error('[ChatController Error]:', error.message);
-
-      return res.status(500).json({
-        success: false,
-        message: 'Terjadi kesalahan saat memproses permintaan ke AI. Silakan coba lagi.'
-      });
     }
-  },
 
-  resetSession(req, res) {
-    const sessionId = req.body?.sessionId || 'web-default';
-    geminiService.resetChatSession(sessionId);
+    const result = await geminiService.generateChatReply(message, { sessionId });
 
     return res.status(200).json({
       success: true,
-      message: 'Sesi percakapan berhasil direset.'
+      data: {
+        pausedByTakeover: false,
+        reply: result.reply,
+        orderCreated: Boolean(result.orderCreated)
+      }
+    });
+  } catch (error) {
+    console.error('[ChatController Error]:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Terjadi gangguan pada layanan asisten AI. Silakan coba lagi.'
     });
   }
 };
 
-module.exports = chatController;
+const resetChat = (req, res) => {
+  const sessionId = req.body?.sessionId || 'web-default';
+  geminiService.resetChatSession(sessionId);
+  storeState.releaseAdminTakeover(sessionId);
+
+  return res.status(200).json({
+    success: true,
+    message: 'Sesi percakapan berhasil direset.'
+  });
+};
+
+const getStoreState = async (req, res) => {
+  try {
+    await geminiService.cekKapasitasDanBentrok(null);
+    return res.status(200).json({
+      success: true,
+      data: storeState.getState()
+    });
+  } catch (error) {
+    console.error('[StoreState Error]:', error.message);
+    return res.status(200).json({
+      success: true,
+      data: storeState.getState()
+    });
+  }
+};
+
+const updateStoreState = (req, res) => {
+  const updated = storeState.setAdminToggle(req.body || {});
+  return res.status(200).json({
+    success: true,
+    data: updated
+  });
+};
+
+module.exports = {
+  handleChat,
+  resetChat,
+  getStoreState,
+  updateStoreState
+};
