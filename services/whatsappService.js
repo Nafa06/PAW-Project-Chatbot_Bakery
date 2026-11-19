@@ -11,6 +11,17 @@ const botSentMessageIds = new Set();
 const pendingBotReplies = [];
 const chatQueues = new Map();
 
+const IGNORED_MSG_TYPES = new Set([
+  'e2e_notification',
+  'notification',
+  'notification_template',
+  'protocol',
+  'gp2',
+  'call_log',
+  'revoked',
+  'reaction'
+]);
+
 const getBrowserExecutablePath = () => {
   const candidates = [
     'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
@@ -43,17 +54,14 @@ const isBotOwnMessage = (msg, body) => {
   const shortId = msg.id?.id || '';
   const serializedId = msg.id?._serialized || '';
 
-  // 1. Cek ID yang sudah tercatat
   if ((shortId && botSentMessageIds.has(shortId)) || (serializedId && botSentMessageIds.has(serializedId))) {
     return true;
   }
 
-  // 2. Pesan yang digenerate oleh whatsapp-web.js selalu diawali '3EB0'
   if (shortId.startsWith('3EB0')) {
     return true;
   }
 
-  // 3. Cek daftar balasan bot yang sedang/baru dikirim (jangan dihapus dulu sampai expired)
   cleanupPendingReplies();
   const matched = pendingBotReplies.some((item) => item.text === body);
   if (matched) {
@@ -101,8 +109,7 @@ const sendBotReply = async (client, chatId, text) => {
 };
 
 const initWhatsApp = () => {
-  let isClientReady = false;
-  let botReadyTime = Math.floor(Date.now() / 1000);
+  let botStartTime = Math.floor(Date.now() / 1000);
   const executablePath = getBrowserExecutablePath();
 
   if (executablePath) {
@@ -130,9 +137,16 @@ const initWhatsApp = () => {
     qrcode.generate(qr, { small: true });
   });
 
+  client.on('loading_screen', (percent, message) => {
+    console.log(`[WhatsApp] Loading ${percent}% - ${message}`);
+  });
+
+  client.on('authenticated', () => {
+    console.log('[WhatsApp] Autentikasi berhasil, menyinkronkan chat...');
+  });
+
   client.on('ready', () => {
-    isClientReady = true;
-    botReadyTime = Math.floor(Date.now() / 1000);
+    botStartTime = Math.floor(Date.now() / 1000);
     console.log('[WhatsApp] Bot WA terhubung & siap melayani!');
     console.log('[WhatsApp] Perintah Admin di chat pelanggan: "/bot" (aktifkan bot lagi), "/stop" (takeover manual)');
   });
@@ -142,22 +156,17 @@ const initWhatsApp = () => {
   });
 
   client.on('disconnected', (reason) => {
-    isClientReady = false;
     console.warn('[WhatsApp] Koneksi terputus:', reason);
   });
 
   client.on('message_create', async (msg) => {
     try {
-      // Abaikan semua event sebelum client benar-benar ready
-      if (!isClientReady) return;
-
-      // Abaikan pesan lama hasil sinkronisasi awal
-      if (msg.timestamp && msg.timestamp < botReadyTime - 2) {
+      // Abaikan pesan lama hasil sinkronisasi awal (toleransi selisih jam 15 detik)
+      if (msg.timestamp && msg.timestamp < botStartTime - 15) {
         return;
       }
 
-      // Abaikan notifikasi sistem WhatsApp (enkripsi, panggilan, reaksi, dll.)
-      if (msg.type !== 'chat') {
+      if (IGNORED_MSG_TYPES.has(msg.type)) {
         return;
       }
 
@@ -180,7 +189,6 @@ const initWhatsApp = () => {
       // 1. JIKA PESAN KELUAR (fromMe)
       // ========================================================
       if (msg.fromMe) {
-        // Abaikan jika pesan ini dikirim oleh bot sendiri
         if (isBotOwnMessage(msg, body)) {
           return;
         }
@@ -235,8 +243,15 @@ const initWhatsApp = () => {
         try {
           if (storeState.isBotPausedForSession(chatId)) return;
 
-          const contact = await msg.getContact();
-          const nomorPelanggan = formatNomorIndo(contact?.number || chatId.split('@')[0]);
+          let nomorPelanggan = formatNomorIndo(chatId.split('@')[0]);
+          try {
+            const contact = await msg.getContact();
+            if (contact?.number) {
+              nomorPelanggan = formatNomorIndo(contact.number);
+            }
+          } catch (_) {
+            // Fallback ke ID pengirim jika getContact gagal
+          }
 
           console.log(`[WA Masuk] ${nomorPelanggan}: ${body}`);
 
