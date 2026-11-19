@@ -114,46 +114,84 @@
 
     </div>
 
-    <!-- Kolom Kanan: Panel Chat AI (Lebar 1/3) -->
-    <div class="bg-white rounded-xl shadow-sm border border-krim flex flex-col h-[550px] lg:h-[700px]">
-      <div class="bg-[#075E54] text-white p-4 rounded-t-xl flex justify-between items-center">
-        <div>
-          <h2 class="font-bold flex items-center gap-2">🤖 BakeryBot Assistant</h2>
-          <p id="bot-status" class="text-xs text-green-100">Online • Tanya katalog, harga & estimasi</p>
+    <!-- Kolom Kanan: Kontrol Toko + Panel Chat AI (Lebar 1/3) -->
+    <div class="space-y-4">
+
+      <!-- Panel Kontrol Operasional & Full Order (PRD) -->
+      <section class="bg-white p-4 rounded-xl shadow-sm border border-krim text-xs space-y-3">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+          <span class="font-bold text-selai text-sm">⚙️ Kontrol Operasional Toko</span>
+          <span id="badge-jam-kerja" class="px-2.5 py-0.5 rounded-full font-semibold bg-gray-100 text-gray-600">Memuat...</span>
         </div>
-        <button onclick="resetChat()" title="Mulai ulang sesi chat" class="text-xs bg-emerald-700 hover:bg-emerald-800 px-2.5 py-1 rounded-full font-semibold transition-colors">
-          🔄 Reset
-        </button>
-      </div>
-      
-      <div id="chat-messages" class="flex-1 bg-[#E5DDD5] p-4 overflow-y-auto space-y-3 text-sm" style="background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');">
-        <div class="text-center text-xs text-gray-500 mb-2 bg-white/80 rounded-full w-fit mx-auto px-3 py-1">Hari Ini</div>
-        
-        <!-- Pesan Pembuka AI -->
-        <div class="flex flex-col gap-1 items-start pr-10">
-          <div class="bg-white text-gray-800 p-3 rounded-lg rounded-tl-none shadow-sm leading-relaxed">
-            Halo! Saya <b>BakeryBot</b> 👋 Silakan tanya seputar daftar menu kue, harga dasar, waktu pengerjaan, atau biaya tambahan di toko kami.
+
+        <div class="flex items-center justify-between">
+          <div>
+            <label for="toggle-full-order" class="font-bold text-red-700 cursor-pointer flex items-center gap-2">
+              <input type="checkbox" id="toggle-full-order" onchange="updateStoreToggle()" class="rounded text-red-600 focus:ring-red-500">
+              Mode Full Order
+            </label>
+            <p id="badge-full-source" class="text-[11px] text-gray-500 mt-0.5">Status: Memuat...</p>
+          </div>
+
+          <label for="toggle-admin-offline" class="font-semibold text-gray-700 cursor-pointer flex items-center gap-1.5">
+            <input type="checkbox" id="toggle-admin-offline" onchange="updateStoreToggle()" class="rounded">
+            Luar Jam Kerja / Offline
+          </label>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-gray-100">
+          <div>
+            <label class="block text-[11px] text-gray-500 mb-1">Kuota/Minggu</label>
+            <input type="number" id="input-max-minggu" min="1" value="10" onchange="updateStoreToggle()" class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-selai">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-[11px] text-gray-500 mb-1">Estimasi Buka Order Lagi</label>
+            <input type="text" id="input-estimasi-buka" placeholder="Otomatis / isi manual" onchange="updateStoreToggle()" class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-selai">
           </div>
         </div>
-      </div>
+      </section>
 
-      <form id="form-chat" class="p-3 bg-gray-100 rounded-b-xl flex gap-2 items-center">
-        <input 
-          type="text" 
-          id="chat-input" 
-          maxlength="500"
-          placeholder="Tanya harga kue atau pesan langsung..." 
-          autocomplete="off"
-          class="flex-1 bg-white border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#128C7E]"
-        >
-        <button 
-          type="submit" 
-          id="chat-submit"
-          class="bg-[#128C7E] hover:bg-[#075E54] disabled:bg-gray-400 text-white w-10 h-10 flex justify-center items-center rounded-full font-bold transition-colors shrink-0"
-        >
-          ➤
-        </button>
-      </form>
+      <!-- Card Chat AI -->
+      <div class="bg-white rounded-xl shadow-sm border border-krim flex flex-col h-[520px] lg:h-[600px]">
+        <div class="bg-[#075E54] text-white p-4 rounded-t-xl flex justify-between items-center">
+          <div>
+            <h2 class="font-bold flex items-center gap-2">🤖 BakeryBot Assistant</h2>
+            <p id="bot-status" class="text-xs text-green-100">Online • Tanya katalog, harga & estimasi</p>
+          </div>
+          <button onclick="resetChat()" title="Mulai ulang sesi chat" class="text-xs bg-emerald-700 hover:bg-emerald-800 px-2.5 py-1 rounded-full font-semibold transition-colors">
+            🔄 Reset
+          </button>
+        </div>
+        
+        <div id="chat-messages" class="flex-1 bg-[#E5DDD5] p-4 overflow-y-auto space-y-3 text-sm" style="background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');">
+          <div class="text-center text-xs text-gray-500 mb-2 bg-white/80 rounded-full w-fit mx-auto px-3 py-1">Hari Ini</div>
+          
+          <!-- Pesan Pembuka AI -->
+          <div class="flex flex-col gap-1 items-start pr-10">
+            <div class="bg-white text-gray-800 p-3 rounded-lg rounded-tl-none shadow-sm leading-relaxed">
+              Halo! Saya <b>BakeryBot</b> 👋 Silakan tanya seputar daftar menu kue, harga dasar, waktu pengerjaan, atau biaya tambahan di toko kami.
+            </div>
+          </div>
+        </div>
+
+        <form id="form-chat" class="p-3 bg-gray-100 rounded-b-xl flex gap-2 items-center">
+          <input 
+            type="text" 
+            id="chat-input" 
+            maxlength="500"
+            placeholder="Tanya harga kue atau pesan langsung..." 
+            autocomplete="off"
+            class="flex-1 bg-white border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#128C7E]"
+          >
+          <button 
+            type="submit" 
+            id="chat-submit"
+            class="bg-[#128C7E] hover:bg-[#075E54] disabled:bg-gray-400 text-white w-10 h-10 flex justify-center items-center rounded-full font-bold transition-colors shrink-0"
+          >
+            ➤
+          </button>
+        </form>
+      </div>
     </div>
 
   </main>
@@ -171,6 +209,70 @@
       window.toastTimer = setTimeout(() => {
         toast.classList.add('hidden');
       }, 3000);
+    }
+
+    async function loadStoreState() {
+      try {
+        const res = await fetch('/api/chat/store-state');
+        const json = await res.json();
+        if (!json.success) return;
+
+        const s = json.data;
+        document.getElementById('toggle-full-order').checked = s.isFullOrder;
+        document.getElementById('toggle-admin-offline').checked = s.adminManualOffline;
+        document.getElementById('input-max-minggu').value = s.maxPesananPerMinggu;
+        document.getElementById('input-estimasi-buka').value = s.estimasiBukaOrder || '';
+
+        const badgeJam = document.getElementById('badge-jam-kerja');
+        if (s.isAdminOffline) {
+          badgeJam.textContent = s.isRealOutsideHours
+            ? `Di Luar Jam Kerja (${s.jamOperasionalText})`
+            : 'Simulasi Luar Jam Kerja / Offline';
+          badgeJam.className = 'px-2.5 py-0.5 rounded-full font-semibold bg-amber-100 text-amber-800';
+        } else {
+          badgeJam.textContent = `Buka (${s.jamOperasionalText})`;
+          badgeJam.className = 'px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800';
+        }
+
+        const badgeSource = document.getElementById('badge-full-source');
+        if (s.sumberFullOrder === 'ADMIN_LOCK') {
+          badgeSource.textContent = 'Dikunci Admin';
+          badgeSource.className = 'text-[11px] text-red-600 font-semibold mt-0.5';
+        } else if (s.sumberFullOrder === 'AUTO_WEEKLY_LIMIT') {
+          badgeSource.textContent = '⚠️ Kuota tercapai';
+          badgeSource.className = 'text-[11px] text-amber-700 font-semibold mt-0.5';
+        } else {
+          badgeSource.textContent = 'Menerima Pesanan';
+          badgeSource.className = 'text-[11px] text-emerald-700 mt-0.5';
+        }
+      } catch (err) {
+        console.error('Gagal memuat status operasional:', err);
+      }
+    }
+
+    async function updateStoreToggle() {
+      try {
+        const payload = {
+          isFullOrder: document.getElementById('toggle-full-order').checked,
+          adminManualOffline: document.getElementById('toggle-admin-offline').checked,
+          maxPesananPerMinggu: parseInt(document.getElementById('input-max-minggu').value, 10) || 10,
+          estimasiBukaOrder: document.getElementById('input-estimasi-buka').value.trim()
+        };
+
+        const res = await fetch('/api/chat/store-state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          await loadStoreState();
+          showToast('✅ Pengaturan operasional toko diperbarui', true);
+        }
+      } catch (err) {
+        showToast('❌ Gagal mengubah status operasional', false);
+      }
     }
 
     function loadData() {
@@ -225,6 +327,8 @@
           bakery.biayaTambahan.forEach(p => {
             biayaBody.innerHTML += `<tr class="border-b border-gray-100 last:border-0"><td class="py-2 font-semibold">${p.parameter}<br><span class="text-xs text-gray-500 font-normal">${p.ket}</span></td><td class="py-2 text-selai font-medium">${p.range}</td></tr>`;
           });
+
+          loadStoreState();
         });
     }
 
@@ -346,6 +450,7 @@
       }
     }
 
+    loadStoreState();
     loadData();
 
     fetch('/api/status')
@@ -445,6 +550,8 @@
           appendChatBubble(result.data.reply, 'bot');
           if (result.data.orderCreated) {
             loadData();
+          } else {
+            loadStoreState();
           }
         }
       } catch (err) {
