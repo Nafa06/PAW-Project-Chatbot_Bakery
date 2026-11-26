@@ -163,9 +163,6 @@ npm run test:coverage
 | `GET` | `/api/chat/store-state` | - | Mengambil status operasional toko dan batas kuota mingguan |
 | `POST` | `/api/chat/store-state` | `{ isFullOrder?, forceManual?, adminManualOffline?, maxPesananPerMinggu?, estimasiBukaOrder? }` | Mengubah status operasional toko dari dashboard admin |
 
-```
-
-
 ## Hasil Tampilan Praktikum
 
 Berikut adalah bukti screenshot Tugas Pertemuan 11 yang sudah berhasil dijalankan:
