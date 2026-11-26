@@ -9,7 +9,7 @@ module.exports = defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      exclude: ['node_modules/', 'tests/', 'services/whatsappService.js']
+      exclude: ['node_modules/**', '**/tests/**', 'services/whatsappService.js']
     }
   }
 });

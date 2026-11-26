@@ -3,3 +3,4 @@ logs/logger.md
 .env
 .wwebjs_auth/
 .wwebjs_cache/
+coverage/
